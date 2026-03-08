@@ -1,14 +1,47 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime"
 
-const client = new BedrockRuntimeClient({ 
-  region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
+// Validate environment variables
+const validateEnvVars = () => {
+  const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY']
+  const missing = required.filter(key => !process.env[key])
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
+  }
+  
+  return {
+    region: process.env.AWS_REGION!,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
   }
-})
+}
+
+const getClient = () => {
+  try {
+    const { region, accessKeyId, secretAccessKey } = validateEnvVars()
+    
+    return new BedrockRuntimeClient({ 
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey
+      }
+    })
+  } catch (error) {
+    console.error("Failed to initialize Bedrock client:", error)
+    throw error
+  }
+}
+
+const client = getClient()
 
 export async function generateLearningPath(goal: string, skillLevel: string, weeklyHours: number) {
+  // Check if AWS credentials are configured
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    console.warn("AWS credentials not configured, using mock data")
+    return generateMockPath(goal, skillLevel, weeklyHours)
+  }
+
   const prompt = `You are an expert learning path designer. Create a detailed, personalized learning path for the following:
 
 Goal: ${goal}
@@ -91,10 +124,59 @@ Return ONLY valid JSON, no markdown formatting.`
       data: pathData
     }
   } catch (error) {
-    console.error("Bedrock error:", error)
+    console.error("Bedrock error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      name: error instanceof Error ? error.name : "Unknown",
+      stack: error instanceof Error ? error.stack : undefined,
+      env: {
+        hasRegion: !!process.env.AWS_REGION,
+        hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+        hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
+        region: process.env.AWS_REGION
+      }
+    })
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error"
+    }
+  }
+}
+
+
+// Mock function for when AWS credentials are not available
+function generateMockPath(goal: string, skillLevel: string, weeklyHours: number) {
+  return {
+    success: true,
+    data: {
+      title: `Learn ${goal}`,
+      description: `A comprehensive path to master ${goal} at ${skillLevel} level`,
+      milestones: [
+        {
+          order: 1,
+          title: "Fundamentals",
+          description: "Build a strong foundation",
+          conceptOverview: `Learn the core concepts of ${goal}`,
+          estimatedHours: Math.ceil(weeklyHours * 2),
+          difficulty: "easy" as const,
+          concepts: ["Concept 1", "Concept 2", "Concept 3", "Concept 4", "Concept 5", "Concept 6"],
+          resources: [
+            {
+              title: "Introduction Tutorial",
+              type: "video" as const,
+              source: "YouTube",
+              url: "#",
+              estimatedMinutes: 45,
+              qualityScore: 90
+            }
+          ],
+          tasks: [
+            {
+              title: "Complete basic exercises",
+              description: "Practice fundamental concepts"
+            }
+          ]
+        }
+      ]
     }
   }
 }
