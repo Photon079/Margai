@@ -43,8 +43,8 @@ export const pulse = {
     scale: [1, 1.05, 1],
     transition: {
       duration: 2,
-      repeat: Infinity,
-      ease: "easeInOut"
+      repeat: Number.POSITIVE_INFINITY,
+      repeatType: "loop" as const
     }
   }
 }
