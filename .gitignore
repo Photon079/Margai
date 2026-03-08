@@ -1,0 +1,87 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# AWS
+.aws/
+aws-exports.js
+
+# Vercel
+.vercel/
+.vercel
+
+# Temporary files
+*.tmp
+*.temp
+
+# Package lock files (keep only one)
+package-lock.json
+yarn.lock
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Folders to exclude from git
+old/
+Files/
+.kiro/
+
+# Documentation files to exclude
+SUBMISSION_CHECKLIST.md
+PPT_CONTENT_FOR_GEMINI.md
+PPT_CONTENT_15_SLIDES.md
+FINAL_PPT_CONTENT_14_SLIDES.md
+OPTIMIZED_BUDGET_PLAN.md
+NEXT_STEPS_ROADMAP.md
+HACKATHON_DEMO_PLAN.md
+PROJECT_STRUCTURE.md
+Prototype Development Submission*.pptx
+
+# Next.js specific
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
