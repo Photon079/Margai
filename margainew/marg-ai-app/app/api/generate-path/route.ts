@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!result.success) {
       return NextResponse.json(
-        { success: false, error: result.error },
+        { success: false, error: 'error' in result ? result.error : 'Unknown error' },
         { status: 500 }
       )
     }
