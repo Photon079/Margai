@@ -1,17 +1,5 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb"
-import { DynamoDBDocumentClient, PutCommand, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb"
-
-const client = new DynamoDBClient({
-  region: process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
-  }
-})
-
-const docClient = DynamoDBDocumentClient.from(client)
-
-const TABLE_NAME = "MargAI-LearningPaths"
+// Mock implementation - DynamoDB disabled
+const mockStorage = new Map<string, any>()
 
 export async function saveLearningPath(userId: string, pathData: any) {
   const item = {
@@ -22,43 +10,31 @@ export async function saveLearningPath(userId: string, pathData: any) {
   }
 
   try {
-    await docClient.send(new PutCommand({
-      TableName: TABLE_NAME,
-      Item: item
-    }))
+    mockStorage.set(item.id, item)
+    console.log("Saved to mock storage:", item.id)
     return { success: true, data: item }
   } catch (error) {
-    console.error("DynamoDB save error:", error)
+    console.error("Mock storage save error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
 
 export async function getLearningPath(pathId: string) {
   try {
-    const result = await docClient.send(new GetCommand({
-      TableName: TABLE_NAME,
-      Key: { id: pathId }
-    }))
-    return { success: true, data: result.Item }
+    const item = mockStorage.get(pathId)
+    return { success: true, data: item }
   } catch (error) {
-    console.error("DynamoDB get error:", error)
+    console.error("Mock storage get error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
 
 export async function getUserPaths(userId: string) {
   try {
-    const result = await docClient.send(new QueryCommand({
-      TableName: TABLE_NAME,
-      IndexName: "userId-index",
-      KeyConditionExpression: "userId = :userId",
-      ExpressionAttributeValues: {
-        ":userId": userId
-      }
-    }))
-    return { success: true, data: result.Items || [] }
+    const items = Array.from(mockStorage.values()).filter(item => item.userId === userId)
+    return { success: true, data: items }
   } catch (error) {
-    console.error("DynamoDB query error:", error)
+    console.error("Mock storage query error:", error)
     return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
 }
